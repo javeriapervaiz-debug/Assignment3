@@ -8,7 +8,9 @@ import {
 	integer,
 	pgEnum,
 	uuid,
-	boolean
+	boolean,
+	varchar,
+	real
   } from 'drizzle-orm/pg-core';
   import type { AdapterAccount } from '@auth/core/adapters';
   
@@ -129,5 +131,65 @@ import {
 	  .references(() => users.id, { onDelete: 'cascade' }),
 	email: text('email').notNull(),
 	expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
+	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow()
+  });
+
+  // RAG Tables for Document Management and Vector Search
+
+  // Documents Table - stores metadata about uploaded documents
+  export const documents = pgTable('documents', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	title: varchar('title', { length: 255 }).notNull(),
+	content: text('content').notNull(),
+	sourceUrl: varchar('source_url', { length: 500 }),
+	filePath: varchar('file_path', { length: 500 }),
+	fileType: varchar('file_type', { length: 50 }), // pdf, txt, md, etc.
+	fileSize: integer('file_size'), // in bytes
+	userId: text('user_id')
+	  .notNull()
+	  .references(() => users.id, { onDelete: 'cascade' }),
+	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+	updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow()
+  });
+
+  // Chunks Table - stores text chunks from documents
+  export const chunks = pgTable('chunks', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	documentId: uuid('document_id')
+	  .notNull()
+	  .references(() => documents.id, { onDelete: 'cascade' }),
+	content: text('content').notNull(),
+	chunkIndex: integer('chunk_index').notNull(), // order within document
+	startChar: integer('start_char'), // character position in original document
+	endChar: integer('end_char'), // character position in original document
+	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow()
+  });
+
+  // Embeddings Table - stores vector embeddings for semantic search
+  export const embeddings = pgTable('embeddings', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	chunkId: uuid('chunk_id')
+	  .notNull()
+	  .references(() => chunks.id, { onDelete: 'cascade' }),
+	embedding: text('embedding').notNull(), // JSON array of floats stored as text
+	embeddingVector: text('embedding_vector'), // pgvector column for similarity search
+	modelName: varchar('model_name', { length: 100 }).notNull(), // e.g., 'all-MiniLM-L6-v2'
+	dimension: integer('dimension').notNull(), // embedding dimension
+	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow()
+  });
+
+  // Document Access Control Table - for sharing documents between users
+  export const documentAccess = pgTable('document_access', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	documentId: uuid('document_id')
+	  .notNull()
+	  .references(() => documents.id, { onDelete: 'cascade' }),
+	userId: text('user_id')
+	  .notNull()
+	  .references(() => users.id, { onDelete: 'cascade' }),
+	permission: varchar('permission', { length: 20 }).notNull().default('read'), // read, write, admin
+	grantedBy: text('granted_by')
+	  .notNull()
+	  .references(() => users.id, { onDelete: 'cascade' }),
 	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow()
   });
