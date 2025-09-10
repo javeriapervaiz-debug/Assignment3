@@ -27,15 +27,28 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   try {
+    console.log('Document upload request received');
+    
     const session = await locals.auth();
     if (!session?.user?.id) {
+      console.log('No user session found');
       return json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    console.log('User authenticated:', session.user.id);
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const title = formData.get('title') as string;
     const sourceUrl = formData.get('sourceUrl') as string;
+
+    console.log('File received:', { 
+      name: file?.name, 
+      size: file?.size, 
+      type: file?.type,
+      title,
+      sourceUrl 
+    });
 
     if (!file) {
       return json({ error: 'No file provided' }, { status: 400 });
@@ -44,15 +57,26 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     // Validate file
     const validation = validateFile(file);
     if (!validation.valid) {
+      console.log('File validation failed:', validation.error);
       return json({ error: validation.error }, { status: 400 });
     }
 
+    console.log('File validation passed');
+
     // Parse document
+    console.log('Parsing document...');
     const parsedDoc = await parseDocument(file);
+    console.log('Document parsed:', { 
+      title: parsedDoc.title, 
+      contentLength: parsedDoc.content.length,
+      fileType: parsedDoc.fileType,
+      fileSize: parsedDoc.fileSize
+    });
     
     // Use provided title or parsed title
     const documentTitle = title || parsedDoc.title;
 
+    console.log('Adding document to RAG system...');
     // Add document to RAG system
     const documentId = await ragService.addDocument(session.user.id, {
       title: documentTitle,
@@ -62,9 +86,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       fileSize: parsedDoc.fileSize
     });
 
+    console.log('Document added successfully:', documentId);
+
     return json({ 
       success: true, 
-      documentId,
+      document: {
+        id: documentId,
+        title: documentTitle,
+        fileType: parsedDoc.fileType,
+        fileSize: parsedDoc.fileSize
+      },
       message: 'Document uploaded and processed successfully' 
     });
   } catch (error) {

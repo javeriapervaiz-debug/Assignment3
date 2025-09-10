@@ -50,10 +50,13 @@
 		"@auth/drizzle-adapter": "^1.10.0",
 		"@auth/sveltekit": "^1.10.0",
 		"@google/generative-ai": "^0.24.1",
+		"@types/marked": "^5.0.2",
 		"@types/nodemailer": "^7.0.1",
 		"bcrypt": "^6.0.0",
 		"dotenv": "^17.2.1",
 		"drizzle-orm": "^0.40.0",
+		"highlight.js": "^11.11.1",
+		"marked": "^16.2.1",
 		"nodemailer": "^6.10.1",
 		"postgres": "^3.4.5"
 	}

@@ -101,11 +101,12 @@
         throw new Error(data.error);
       }
       
-      // Add assistant message with the response
+      // Add assistant message with the response and citations
       const assistantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.response || 'Sorry, I couldn\'t generate a response.'
+        content: data.response || 'Sorry, I couldn\'t generate a response.',
+        citations: data.citations || []
       };
       
       messages = [...messages, assistantMessage];

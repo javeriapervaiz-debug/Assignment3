@@ -1,0 +1,33 @@
+Authentication Platform Documentation
+
+This is a comprehensive guide to the authentication platform features:
+
+1. User Management
+   - User registration with email verification
+   - Secure login with password hashing
+   - Profile management and account settings
+   - Password reset functionality
+
+2. Security Features
+   - bcrypt password hashing with 12 salt rounds
+   - JWT-based session management
+   - CSRF protection
+   - SQL injection prevention through Drizzle ORM
+
+3. AI Chat Assistant
+   - Powered by Google Gemini AI
+   - Context-aware responses
+   - Document upload and processing
+   - RAG (Retrieval-Augmented Generation) capabilities
+
+4. Admin Panel
+   - User management interface
+   - System statistics and monitoring
+   - Role-based access control
+
+5. Email Integration
+   - Automated email notifications
+   - Email verification system
+   - Password reset emails
+
+The platform is built with SvelteKit, PostgreSQL, and modern web technologies.

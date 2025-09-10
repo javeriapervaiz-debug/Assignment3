@@ -95,12 +95,12 @@ export class RAGService {
           d.title,
           d.source_url,
           d.id as document_id,
-          1 - (e.embedding_vector <=> ${queryVector}::vector) as similarity
+          1 - (e.embedding_vector::vector <=> ${queryVector}::vector) as similarity
         FROM embeddings e
         JOIN chunks c ON e.chunk_id = c.id
         JOIN documents d ON c.document_id = d.id
         WHERE d.user_id = ${userId}
-        ORDER BY e.embedding_vector <=> ${queryVector}::vector
+        ORDER BY e.embedding_vector::vector <=> ${queryVector}::vector
         LIMIT ${limit}
       `);
 

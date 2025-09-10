@@ -6,6 +6,7 @@ import {
   convertToAIMessages,
   getChatSession
 } from '$lib/server/db/chat';
+import { RAGService } from '$lib/server/rag';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -107,17 +108,76 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       allMessages = [...previousMessages, ...messages];
     }
 
+    // RAG Search - Get relevant context from uploaded documents
+    let ragContext = '';
+    let citations: any[] = [];
+    
+    if (lastMessage?.role === 'user' && lastMessage.content) {
+      try {
+        const ragService = new RAGService();
+        const searchResults = await ragService.search(session.user.id, lastMessage.content, 3);
+        
+        if (searchResults && searchResults.length > 0) {
+          console.log('RAG search results:', searchResults.map(r => ({ title: r.title, similarity: r.similarity })));
+          console.log('Query:', lastMessage.content);
+          
+          // Check if the query is likely about documents
+          const documentKeywords = ['document', 'file', 'upload', 'summarize', 'content', 'text', 'pdf', 'txt', 'md'];
+          const queryLower = lastMessage.content.toLowerCase();
+          const isDocumentQuery = documentKeywords.some(keyword => queryLower.includes(keyword));
+          
+          console.log('Is document query:', isDocumentQuery);
+          
+          // Use different thresholds based on query type
+          const threshold = isDocumentQuery ? 0.15 : 0.4; // Higher threshold for general questions
+          const relevantResults = searchResults.filter((result: any) => result.similarity > threshold);
+          
+          console.log('Relevant results after filtering:', relevantResults.length);
+          console.log('Similarity threshold:', threshold);
+          
+          if (relevantResults.length > 0) {
+            ragContext = '\n\nRelevant information from your documents:\n';
+            citations = relevantResults.map((result: any, index: number) => ({
+              title: result.title || 'Document',
+              content: result.content,
+              sourceUrl: result.source_url,
+              similarity: result.similarity
+            }));
+            
+            relevantResults.forEach((result: any, index: number) => {
+              ragContext += `\n[${index + 1}] ${result.title || 'Document'}:\n${result.content}\n`;
+            });
+          } else {
+            console.log('No relevant results found for query type:', isDocumentQuery ? 'document' : 'general');
+          }
+        }
+      } catch (error) {
+        console.error('RAG search error:', error);
+        // Continue without RAG context if search fails
+      }
+    }
+
     // Prepare messages for Gemini
-    const systemMessage = `You are a helpful AI assistant for an authentication platform. 
-    You can help users with:
-    - General questions about the platform
+    const systemMessage = `You are a helpful AI assistant. You can help users with a wide range of topics including:
+    - General knowledge questions
     - Technical support and troubleshooting
-    - Account management guidance
-    - Security best practices
-    - Feature explanations
+    - Creative writing and brainstorming
+    - Educational content and explanations
+    - Current events and information
+    - Questions about uploaded documents (use the provided context when available)
+    - And much more!
     
     Be professional, helpful, and concise in your responses. 
-    If you don't know something specific about the platform, say so and suggest contacting support.`;
+    You have access to general knowledge and can answer questions on any topic.
+    
+    IMPORTANT: When working with uploaded documents:
+    - Don't just copy text from the documents
+    - Provide intelligent analysis, summaries, and explanations
+    - Add your own insights and context to make the information more useful
+    - For summaries: synthesize the key points and present them clearly
+    - For lists: organize and explain the items, don't just enumerate
+    - For explanations: provide context and make complex topics accessible
+    - Always cite sources using [1], [2], etc. format when referencing document content${ragContext}`;
 
     // Convert messages to Gemini format
     const geminiMessages = allMessages.map(msg => ({
@@ -138,9 +198,40 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     console.log('Generating content with', geminiMessages.length, 'messages');
     console.log('Gemini messages structure:', JSON.stringify(geminiMessages, null, 2));
     
-    const result = await model.generateContent({
-      contents: geminiMessages
-    });
+    let result;
+    try {
+      result = await model.generateContent({
+        contents: geminiMessages
+      });
+    } catch (geminiError: any) {
+      // Handle Gemini API overload or other errors
+      if (geminiError.status === 503) {
+        console.log('Gemini API overloaded, providing fallback response');
+        const fallbackResponse = `I'm currently experiencing high demand and may be temporarily unavailable. However, I can still help you with basic questions on a wide range of topics. 
+
+${ragContext ? `Based on your uploaded documents, here's what I found:\n\n${ragContext}\n\n*Note: This response was generated using your uploaded document content. For more detailed analysis and intelligent synthesis of the information, please try again in a few moments when the AI service is less busy.*` : 'Please try again in a few moments, or feel free to ask about any topic - I can help with general knowledge, technical questions, creative tasks, and much more!'}`;
+        
+        // Save fallback response to database
+        await saveChatMessage(
+          chatSession.id,
+          'assistant',
+          fallbackResponse
+        );
+
+        return new Response(
+          JSON.stringify({ 
+            response: fallbackResponse,
+            sessionId: chatSession.id,
+            citations: citations
+          }),
+          { 
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      throw geminiError; // Re-throw other errors
+    }
 
     console.log('Got response from Gemini');
     const response = await result.response;
@@ -154,11 +245,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       aiResponseText
     );
 
-    // Return simple JSON response
+    // Return JSON response with citations
     return new Response(
       JSON.stringify({ 
         response: aiResponseText,
-        sessionId: chatSession.id
+        sessionId: chatSession.id,
+        citations: citations
       }),
       { 
         status: 200,
