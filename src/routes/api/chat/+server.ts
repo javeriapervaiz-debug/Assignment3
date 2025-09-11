@@ -314,7 +314,7 @@ ${ragContext ? `Based on your uploaded documents, here's what I found:\n\n${ragC
       let fallbackResponse = `I'm currently experiencing connectivity issues with the AI service. However, I can still help you with basic information.\n\n`;
       
       // Check if user is asking for code
-      if (message.toLowerCase().includes('code') || message.toLowerCase().includes('c++') || message.toLowerCase().includes('hello world')) {
+      if (userMessage.toLowerCase().includes('code') || userMessage.toLowerCase().includes('c++') || userMessage.toLowerCase().includes('hello world')) {
         fallbackResponse += `Here's a simple **Hello World** program in C++:\n\n\`\`\`cpp\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}\n\`\`\`\n\n**Explanation:**\n- \`#include <iostream>\` includes the input/output stream library\n- \`int main()\` is the entry point of the program\n- \`std::cout\` prints text to the console\n- \`std::endl\` adds a newline and flushes the output\n- \`return 0\` indicates successful program execution\n\n*Note: For more detailed explanations and advanced code examples, please try again when the AI service is available.*`;
       } else if (ragContext) {
         fallbackResponse += `Based on your uploaded documents, here's what I found:\n\n${ragContext}\n\n*Note: This response was generated using your uploaded document content. For more detailed analysis, please try again when the AI service is available.*`;
