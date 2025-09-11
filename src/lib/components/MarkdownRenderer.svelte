@@ -14,7 +14,23 @@
   
   // Custom code block renderer with syntax highlighting
   renderer.code = function({ text, lang }: { text: string; lang?: string }) {
-    const validLanguage = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
+    // Map common language aliases
+    const languageMap: { [key: string]: string } = {
+      'cpp': 'cpp',
+      'c++': 'cpp',
+      'cxx': 'cpp',
+      'cc': 'cpp',
+      'js': 'javascript',
+      'ts': 'typescript',
+      'py': 'python',
+      'rb': 'ruby',
+      'sh': 'bash',
+      'yml': 'yaml',
+      'md': 'markdown'
+    };
+    
+    const mappedLang = languageMap[lang?.toLowerCase() || ''] || lang;
+    const validLanguage = mappedLang && hljs.getLanguage(mappedLang) ? mappedLang : 'plaintext';
     const highlighted = hljs.highlight(text, { language: validLanguage }).value;
     
     return `
