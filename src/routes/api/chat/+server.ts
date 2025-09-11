@@ -60,6 +60,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
 
     const { messages, sessionId } = await request.json();
+    
+    // Check if the last message has an attachment
+    const lastMessage = messages[messages.length - 1];
+    const hasAttachment = lastMessage?.attachment;
 
     // Validate input
     if (!messages || !Array.isArray(messages)) {
@@ -90,7 +94,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     });
 
     // Get the last user message
-    const lastMessage = messages[messages.length - 1];
     if (lastMessage?.role === 'user') {
       // Save user message to database
       await saveChatMessage(
@@ -115,40 +118,88 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     if (lastMessage?.role === 'user' && lastMessage.content) {
       try {
         const ragService = new RAGService();
-        const searchResults = await ragService.search(session.user.id, lastMessage.content, 3);
         
-        if (searchResults && searchResults.length > 0) {
-          console.log('RAG search results:', searchResults.map(r => ({ title: r.title, similarity: r.similarity })));
-          console.log('Query:', lastMessage.content);
+        // If there's an attachment, provide specific context about that document
+        if (hasAttachment) {
+          console.log('Message has attachment:', hasAttachment);
           
-          // Check if the query is likely about documents
-          const documentKeywords = ['document', 'file', 'upload', 'summarize', 'content', 'text', 'pdf', 'txt', 'md'];
-          const queryLower = lastMessage.content.toLowerCase();
-          const isDocumentQuery = documentKeywords.some(keyword => queryLower.includes(keyword));
+          // Search specifically for the attached document
+          const attachmentResults = await ragService.search(session.user.id, lastMessage.content, 5);
           
-          console.log('Is document query:', isDocumentQuery);
+          // Filter results to prioritize the attached document
+          const attachmentTitle = hasAttachment.title.toLowerCase();
+          const relevantToAttachment = attachmentResults.filter((result: any) => 
+            result.title && result.title.toLowerCase().includes(attachmentTitle.split('.')[0])
+          );
           
-          // Use different thresholds based on query type
-          const threshold = isDocumentQuery ? 0.15 : 0.4; // Higher threshold for general questions
-          const relevantResults = searchResults.filter((result: any) => result.similarity > threshold);
+          // If no specific attachment results, use all results with lower threshold
+          const resultsToUse = relevantToAttachment.length > 0 ? relevantToAttachment : attachmentResults.slice(0, 3);
           
-          console.log('Relevant results after filtering:', relevantResults.length);
-          console.log('Similarity threshold:', threshold);
-          
-          if (relevantResults.length > 0) {
-            ragContext = '\n\nRelevant information from your documents:\n';
-            citations = relevantResults.map((result: any, index: number) => ({
-              title: result.title || 'Document',
+          if (resultsToUse.length > 0) {
+            ragContext = `\n\nIMPORTANT: The user has attached a document named "${hasAttachment.title}" and is asking you to analyze it. You have access to the FULL CONTENT of this document. Here is the document content:\n\n`;
+            citations = resultsToUse.map((result: any, index: number) => ({
+              title: result.title || hasAttachment.title,
               content: result.content,
               sourceUrl: result.source_url,
               similarity: result.similarity
             }));
             
-            relevantResults.forEach((result: any, index: number) => {
-              ragContext += `\n[${index + 1}] ${result.title || 'Document'}:\n${result.content}\n`;
-            });
+            ragContext += resultsToUse.map((result: any, index: number) => `[${index + 1}] ${result.content}`).join('\n\n');
+            ragContext += `\n\nYou can now provide a comprehensive analysis, summary, or answer questions about this document content.`;
           } else {
-            console.log('No relevant results found for query type:', isDocumentQuery ? 'document' : 'general');
+            // If no specific results for the attachment, use general search
+            const searchResults = await ragService.search(session.user.id, lastMessage.content, 3);
+            
+            if (searchResults && searchResults.length > 0) {
+              console.log('RAG search results:', searchResults.map(r => ({ title: r.title, similarity: r.similarity })));
+              console.log('Query:', lastMessage.content);
+              
+              // Check if the query is likely about documents
+              const documentKeywords = ['document', 'file', 'upload', 'summarize', 'content', 'text', 'pdf', 'txt', 'md'];
+              const queryLower = lastMessage.content.toLowerCase();
+              const isDocumentQuery = documentKeywords.some(keyword => queryLower.includes(keyword));
+              
+              console.log('Is document query:', isDocumentQuery);
+              
+              // Use different thresholds based on query type
+              const threshold = isDocumentQuery ? 0.05 : 0.3; // Much lower threshold for document queries
+              const relevantResults = searchResults.filter((result: any) => result.similarity > threshold);
+              
+              console.log('Relevant results after filtering:', relevantResults.length);
+              console.log('Similarity threshold:', threshold);
+              
+              if (relevantResults.length > 0) {
+                ragContext = '\n\nRelevant information from your documents:\n';
+                citations = relevantResults.map((result: any, index: number) => ({
+                  title: result.title || 'Document',
+                  content: result.content,
+                  sourceUrl: result.source_url,
+                  similarity: result.similarity
+                }));
+                
+                relevantResults.forEach((result: any, index: number) => {
+                  ragContext += `\n[${index + 1}] ${result.title || 'Document'}:\n${result.content}\n`;
+                });
+              } else {
+                console.log('No relevant results found for query type:', isDocumentQuery ? 'document' : 'general');
+                // If no results pass the threshold but we have results, use the best ones anyway
+                if (searchResults.length > 0) {
+                  console.log('Using best available results despite low similarity scores');
+                  const bestResults = searchResults.slice(0, 2); // Take top 2 results
+                  ragContext = '\n\nRelevant information from your documents:\n';
+                  citations = bestResults.map((result: any, index: number) => ({
+                    title: result.title || 'Document',
+                    content: result.content,
+                    sourceUrl: result.source_url,
+                    similarity: result.similarity
+                  }));
+                  
+                  bestResults.forEach((result: any, index: number) => {
+                    ragContext += `\n[${index + 1}] ${result.title || 'Document'}:\n${result.content}\n`;
+                  });
+                }
+              }
+            }
           }
         }
       } catch (error) {
@@ -169,6 +220,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     
     Be professional, helpful, and concise in your responses. 
     You have access to general knowledge and can answer questions on any topic.
+    
+    IMPORTANT: Format your responses using Markdown for better readability:
+    - Use **bold** for emphasis and key terms
+    - Use *italics* for subtle emphasis
+    - Use ## Headings for main sections and ### for subsections
+    - Use bullet points (-) or numbered lists (1.) for lists
+    - CRITICAL: For numbered lists, put each item on a separate line:
+      1. First item
+      2. Second item
+      3. Third item
+      NOT: 1. First item 2. Second item 3. Third item
+    - Use \`inline code\` for code snippets and technical terms
+    - Use code blocks with language specification for longer code:
+      \`\`\`javascript
+      // Your code here
+      \`\`\`
+    - Use tables for comparisons or structured data
+    - Use > blockquotes for important notes or quotes
+    - Use --- for horizontal rules to separate sections
     
     IMPORTANT: When working with uploaded documents:
     - Don't just copy text from the documents

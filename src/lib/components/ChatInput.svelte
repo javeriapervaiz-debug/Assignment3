@@ -12,11 +12,16 @@
   let isUploading = false;
   let uploadProgress = 0;
   let showUploadArea = false;
+  let uploadedDocument: any = null; // Store uploaded document info
   
   function handleSubmit() {
     if (message.trim() && !disabled) {
-      dispatch('send', { message: message.trim() });
+      dispatch('send', { 
+        message: message.trim(),
+        attachment: uploadedDocument // Include the uploaded document with the message
+      });
       message = '';
+      uploadedDocument = null; // Clear uploaded document after sending
       // Reset textarea height
       if (textareaElement) {
         textareaElement.style.height = 'auto';
@@ -88,10 +93,12 @@
       const result = await response.json();
       
       if (result.success && result.document) {
-        // Add success message to chat
-        dispatch('send', { 
-          message: `I've uploaded and processed the document "${result.document.title}". You can now ask questions about its content!` 
-        });
+        // Store the uploaded document info for the user to reference
+        uploadedDocument = result.document;
+        
+        // Show success feedback but don't auto-send message
+        // User can now write their own message about the document
+        console.log('Document uploaded successfully:', result.document);
       } else {
         throw new Error(result.error || 'Upload failed');
       }
@@ -186,6 +193,30 @@
             </div>
           </div>
         {/if}
+      </div>
+    </div>
+  {/if}
+
+  <!-- Uploaded Document Indicator -->
+  {#if uploadedDocument}
+    <div class="mb-3 p-3 bg-emerald-600/20 border border-emerald-500/30 rounded-lg">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-sm text-emerald-300">
+          Document "{uploadedDocument.title}" uploaded successfully! You can now ask questions about it.
+        </span>
+        <button
+          type="button"
+          on:click={() => uploadedDocument = null}
+          class="ml-auto text-emerald-400 hover:text-emerald-300 transition-colors"
+          aria-label="Dismiss"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
     </div>
   {/if}

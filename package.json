@@ -58,6 +58,7 @@
 		"highlight.js": "^11.11.1",
 		"marked": "^16.2.1",
 		"nodemailer": "^6.10.1",
+		"pdfjs-dist": "^5.4.149",
 		"postgres": "^3.4.5"
 	}
 }

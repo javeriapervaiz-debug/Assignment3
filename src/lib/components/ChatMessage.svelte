@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { marked } from 'marked';
-  import hljs from 'highlight.js';
+  import MarkdownRenderer from './MarkdownRenderer.svelte';
   
   // Define Message type locally since 'ai' package might not be available
   interface Message {
@@ -9,6 +8,12 @@
     role: 'user' | 'assistant';
     content: string;
     citations?: any[];
+    attachment?: {
+      id: string;
+      title: string;
+      fileType: string;
+      fileSize: number;
+    };
   }
   
   export let message: Message;
@@ -20,49 +25,30 @@
   $: isUser = message.role === 'user';
   $: isAssistant = message.role === 'assistant';
   
-  // Configure marked for markdown rendering
-  marked.setOptions({
-    breaks: true,
-    gfm: true
-  });
-  
-  // Custom renderer for code highlighting
-  const renderer = new marked.Renderer();
-  renderer.code = function({ text, lang }: { text: string; lang?: string }) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return `<pre><code class="hljs language-${lang}">${hljs.highlight(text, { language: lang }).value}</code></pre>`;
-      } catch (err) {
-        console.error('Highlight error:', err);
-      }
-    }
-    return `<pre><code class="hljs">${hljs.highlightAuto(text).value}</code></pre>`;
-  };
-  
-  marked.use({ renderer });
-  
-  // Process message content for citations and markdown
+  // Process message content for citations
   $: {
+    console.log('ChatMessage - message:', message);
+    console.log('ChatMessage - message.content:', message.content, 'type:', typeof message.content);
+    
     if (message.content) {
       // Check if message has citations (from RAG responses)
       if (message.citations && Array.isArray(message.citations)) {
         citations = message.citations;
-        messageContent = message.content;
+        messageContent = String(message.content);
       } else {
         // Regular message processing
         citations = [];
-        messageContent = message.content;
+        messageContent = String(message.content);
       }
+    } else {
+      messageContent = '';
+      citations = [];
     }
+    
+    console.log('ChatMessage - messageContent:', messageContent, 'type:', typeof messageContent);
   }
   
-  // Render markdown to HTML
-  $: renderedContent = isAssistant ? marked(messageContent) : messageContent;
-  
-  onMount(() => {
-    // Initialize highlight.js for code blocks
-    hljs.highlightAll();
-  });
+  // Message content is now handled by MarkdownRenderer component
 </script>
 
 <div class="flex {isUser ? 'justify-end' : 'justify-start'} mb-6">
@@ -95,6 +81,59 @@
         }
         {isLoading ? 'animate-pulse' : ''}
       ">
+        <!-- Document Attachment Display (for user messages) -->
+        {#if isUser && message.attachment}
+          <div class="mb-3 p-3 bg-white/10 rounded-lg border border-white/20">
+            <div class="flex items-center space-x-3">
+              <!-- File Icon -->
+              <div class="flex-shrink-0">
+                {#if message.attachment.fileType === 'application/pdf'}
+                  <div class="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                {:else if message.attachment.fileType === 'text/plain'}
+                  <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                {:else if message.attachment.fileType === 'text/markdown'}
+                  <div class="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                  </div>
+                {:else}
+                  <div class="w-8 h-8 bg-gray-500 rounded flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                {/if}
+              </div>
+              
+              <!-- File Info -->
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium text-white truncate">
+                  {message.attachment.title}
+                </div>
+                <div class="text-xs text-white/70">
+                  {message.attachment.fileType.split('/')[1].toUpperCase()} • {(message.attachment.fileSize / 1024).toFixed(1)} KB
+                </div>
+              </div>
+              
+              <!-- Attachment Badge -->
+              <div class="flex-shrink-0">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                  📎 Attached
+                </span>
+              </div>
+            </div>
+          </div>
+        {/if}
+        
         {#if isLoading && isAssistant}
           <div class="flex items-center space-x-2">
             <div class="flex space-x-1">
@@ -105,9 +144,11 @@
             <span class="text-sm text-gray-400">AI is thinking...</span>
           </div>
         {:else}
-          <div class="prose prose-invert max-w-none prose-headings:text-white prose-p:text-gray-100 prose-strong:text-white prose-code:text-pink-300 prose-pre:bg-slate-900/50 prose-pre:border prose-pre:border-slate-700">
-            {@html renderedContent}
-          </div>
+          {#if isAssistant}
+            <MarkdownRenderer content={messageContent} />
+          {:else}
+            <div class="text-white whitespace-pre-wrap">{messageContent}</div>
+          {/if}
           
           <!-- Citations -->
           {#if citations && citations.length > 0}

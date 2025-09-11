@@ -1,4 +1,5 @@
 // src/lib/server/document-parser.ts
+// Note: pdf-parse is imported dynamically to avoid module initialization issues
 
 export interface ParsedDocument {
   title: string;
@@ -38,22 +39,108 @@ export async function parseMarkdown(file: File): Promise<ParsedDocument> {
 }
 
 /**
- * Parse PDF files (basic implementation)
- * Note: For production, you'd want to use a proper PDF parser like pdf-parse
+ * Parse PDF files using pdfjs-dist with advanced text extraction
  */
 export async function parsePDF(file: File): Promise<ParsedDocument> {
-  // This is a placeholder implementation
-  // In production, you'd use a library like pdf-parse or pdf2pic
   const title = file.name.replace(/\.[^/.]+$/, '');
-  
-  // For now, return a placeholder
-  // TODO: Implement actual PDF parsing
-  return {
-    title,
-    content: `[PDF Content - ${file.name}]\n\nThis is a placeholder for PDF content. In production, you would use a proper PDF parsing library to extract text from the PDF file.`,
-    fileType: 'application/pdf',
-    fileSize: file.size
-  };
+
+  try {
+    // Convert File to ArrayBuffer
+    const arrayBuffer = await file.arrayBuffer();
+    
+    // Dynamic import of pdfjs-dist
+    const pdfjsLib = await import('pdfjs-dist');
+    
+    // Configure pdfjs-dist for Node.js environment
+    const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.mjs');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+    
+    // Load the PDF document with enhanced options
+    const loadingTask = pdfjsLib.getDocument({
+      data: arrayBuffer,
+      useSystemFonts: true,
+      disableFontFace: false,
+      disableRange: false,
+      disableStream: false,
+      disableAutoFetch: false,
+      maxImageSize: 1024 * 1024, // 1MB
+      isEvalSupported: false,
+      useWorkerFetch: false,
+      verbosity: 0
+    });
+
+    const pdf = await loadingTask.promise;
+    let fullText = '';
+    let pageTexts: string[] = [];
+
+    console.log(`PDF loaded: ${pdf.numPages} pages`);
+
+    // Extract text from each page with enhanced options
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      try {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent({
+          normalizeWhitespace: false,
+          disableCombineTextItems: false
+        });
+
+        // Extract text items with better formatting
+        const pageText = textContent.items
+          .map((item: any) => {
+            if (item.str) {
+              return item.str;
+            }
+            return '';
+          })
+          .join(' ')
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
+
+        pageTexts.push(pageText);
+        fullText += pageText + '\n\n';
+        
+        console.log(`Page ${pageNum}: ${pageText.length} characters extracted`);
+      } catch (pageError) {
+        console.error(`Error extracting page ${pageNum}:`, pageError);
+        pageTexts.push(`[Error extracting page ${pageNum}]`);
+      }
+    }
+
+    // Clean up the extracted text with better formatting
+    let content = fullText
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Replace multiple newlines with double newline
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/\n /g, '\n') // Remove spaces at start of lines
+      .replace(/ \n/g, '\n') // Remove spaces at end of lines
+      .trim();
+
+    // If no text was extracted, provide a helpful message
+    if (!content || content.length < 10) {
+      content = `[PDF Content - ${file.name}]\n\nThis PDF appears to contain images or non-text content that couldn't be extracted. The PDF has ${pdf.numPages} page(s).`;
+    } else {
+      // Add page information for better context
+      content = `[PDF Content - ${file.name}]\n\n${content}\n\n[End of PDF - ${pdf.numPages} pages total]`;
+    }
+
+    console.log(`PDF parsing completed: ${content.length} total characters`);
+
+    return {
+      title,
+      content,
+      fileType: 'application/pdf',
+      fileSize: file.size
+    };
+  } catch (error) {
+    console.error('PDF parsing error:', error);
+
+    // Return a fallback if PDF parsing fails
+    return {
+      title,
+      content: `[PDF Content - ${file.name}]\n\nError parsing PDF: ${error instanceof Error ? error.message : 'Unknown error'}. The file may be corrupted or password-protected.`,
+      fileType: 'application/pdf',
+      fileSize: file.size
+    };
+  }
 }
 
 /**

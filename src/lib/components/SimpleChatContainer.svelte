@@ -58,19 +58,20 @@
   
   // Handle sending messages
   function handleSend(event: CustomEvent) {
-    const { message } = event.detail;
-    handleSendMessage(message);
+    const { message, attachment } = event.detail;
+    handleSendMessage(message, attachment);
   }
   
   // Send message to API
-  async function handleSendMessage(content: string) {
+  async function handleSendMessage(content: string, attachment?: any) {
     if (!content.trim() || isLoading) return;
     
     // Add user message to messages
     const userMessage = {
       id: Date.now().toString(),
       role: 'user',
-      content: content.trim()
+      content: content.trim(),
+      attachment: attachment
     };
     
     messages = [...messages, userMessage];
