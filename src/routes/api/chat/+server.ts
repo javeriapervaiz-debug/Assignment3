@@ -6,6 +6,7 @@ import {
   convertToAIMessages,
   getChatSession
 } from '$lib/server/db/chat';
+import { retrieveContext, generateContextPrompt } from '$lib/server/context';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -90,7 +91,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
     // Get the last user message
     const lastMessage = messages[messages.length - 1];
+    let contextChunks = [];
+    let citations = [];
+    
     if (lastMessage?.role === 'user') {
+      // Retrieve relevant context for the user's query
+      const contextResult = await retrieveContext(lastMessage.content, 3);
+      contextChunks = contextResult.chunks;
+      citations = contextResult.citations;
+      
       // Save user message to database
       await saveChatMessage(
         chatSession.id,
@@ -107,17 +116,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       allMessages = [...previousMessages, ...messages];
     }
 
-    // Prepare messages for Gemini
-    const systemMessage = `You are a helpful AI assistant for an authentication platform. 
-    You can help users with:
-    - General questions about the platform
-    - Technical support and troubleshooting
-    - Account management guidance
-    - Security best practices
-    - Feature explanations
-    
-    Be professional, helpful, and concise in your responses. 
-    If you don't know something specific about the platform, say so and suggest contacting support.`;
+    // Prepare messages for Gemini with context
+    const systemMessage = generateContextPrompt(contextChunks);
 
     // Convert messages to Gemini format
     const geminiMessages = allMessages.map(msg => ({
@@ -154,11 +154,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       aiResponseText
     );
 
-    // Return simple JSON response
+    // Return response with citations
     return new Response(
       JSON.stringify({ 
         response: aiResponseText,
-        sessionId: chatSession.id
+        sessionId: chatSession.id,
+        citations: citations
       }),
       { 
         status: 200,

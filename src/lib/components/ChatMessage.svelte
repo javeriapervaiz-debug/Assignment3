@@ -1,11 +1,20 @@
 <script lang="ts">
-  import type { Message } from 'ai';
+  // Define Message type locally since we're not using the ai package
+  interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    citations?: Array<{id: string, title: string, url?: string, chunk?: string}>;
+  }
+  import MarkdownRenderer from './MarkdownRenderer.svelte';
   
   export let message: Message;
   export let isLoading: boolean = false;
+  export let citations: Array<{id: string, title: string, url?: string, chunk?: string}> = [];
   
   $: isUser = message.role === 'user';
   $: isAssistant = message.role === 'assistant';
+  $: messageCitations = message.citations || citations || [];
 </script>
 
 <div class="flex {isUser ? 'justify-end' : 'justify-start'} mb-6">
@@ -48,9 +57,11 @@
             <span class="text-sm text-gray-400">AI is thinking...</span>
           </div>
         {:else}
-          <div class="prose prose-invert max-w-none">
-            {@html message.content}
-          </div>
+          {#if isAssistant}
+            <MarkdownRenderer content={message.content} citations={messageCitations} />
+          {:else}
+            <div class="text-gray-200 whitespace-pre-wrap">{message.content}</div>
+          {/if}
         {/if}
       </div>
       

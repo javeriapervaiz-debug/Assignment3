@@ -4,6 +4,14 @@
   import ChatInput from './ChatInput.svelte';
   import ChatSessionManager from './ChatSessionManager.svelte';
   
+  // Define Message type locally
+  interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    citations?: Array<{id: string, title: string, url?: string, chunk?: string}>;
+  }
+  
   export let initialMessages: any[] = [];
   export let showSessionManager: boolean = true;
   
@@ -101,11 +109,12 @@
         throw new Error(data.error);
       }
       
-      // Add assistant message with the response
+      // Add assistant message with the response and citations
       const assistantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.response || 'Sorry, I couldn\'t generate a response.'
+        content: data.response || 'Sorry, I couldn\'t generate a response.',
+        citations: data.citations || []
       };
       
       messages = [...messages, assistantMessage];

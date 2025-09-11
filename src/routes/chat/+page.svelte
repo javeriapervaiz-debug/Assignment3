@@ -2,7 +2,14 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import SimpleChatContainer from '$lib/components/SimpleChatContainer.svelte';
-  import type { Message } from 'ai';
+  
+  // Define Message type locally
+  interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    citations?: Array<{id: string, title: string, url?: string, chunk?: string}>;
+  }
   
   let chatContainer: HTMLDivElement;
   
