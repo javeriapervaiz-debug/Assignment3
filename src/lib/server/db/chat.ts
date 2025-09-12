@@ -1,9 +1,10 @@
 // src/lib/server/db/chat.ts
 
 import { db } from './index';
-import { chatSessions, chatMessages, chatAnalytics } from './schema';
+import { chatSessions, chatMessages, chatAnalytics, chats, messages } from './schema';
 import { eq, desc, and, count } from 'drizzle-orm';
 import type { Message } from 'ai';
+import { chatTreeService } from '../chat-tree';
 
 export interface ChatSession {
   id: string;
@@ -33,36 +34,45 @@ export interface ChatAnalytics {
   createdAt: Date;
 }
 
-// Create a new chat session
+// Create a new chat session (now uses tree service)
 export async function createChatSession(userId: string, title?: string): Promise<ChatSession> {
-  const [session] = await db.insert(chatSessions).values({
-    userId,
-    title: title || 'New Chat',
-    isActive: true
-  }).returning();
-
-  return session;
+  const chat = await chatTreeService.createChat(userId, title || 'New Chat');
+  return {
+    id: chat.id,
+    userId: chat.userId,
+    title: chat.title,
+    isActive: chat.isActive,
+    createdAt: chat.createdAt,
+    updatedAt: chat.updatedAt
+  };
 }
 
-// Get user's chat sessions
+// Get user's chat sessions (now uses tree service)
 export async function getUserChatSessions(userId: string, limit: number = 20): Promise<ChatSession[]> {
-  return await db
-    .select()
-    .from(chatSessions)
-    .where(and(eq(chatSessions.userId, userId), eq(chatSessions.isActive, true)))
-    .orderBy(desc(chatSessions.updatedAt))
-    .limit(limit);
+  const chats = await chatTreeService.getUserChats(userId);
+  return chats.slice(0, limit).map(chat => ({
+    id: chat.id,
+    userId: chat.userId,
+    title: chat.title,
+    isActive: chat.isActive,
+    createdAt: chat.createdAt,
+    updatedAt: chat.updatedAt
+  }));
 }
 
-// Get a specific chat session
+// Get a specific chat session (now uses tree service)
 export async function getChatSession(sessionId: string, userId: string): Promise<ChatSession | null> {
-  const [session] = await db
-    .select()
-    .from(chatSessions)
-    .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.userId, userId)))
-    .limit(1);
-
-  return session || null;
+  const chat = await chatTreeService.getChat(sessionId, userId);
+  if (!chat) return null;
+  
+  return {
+    id: chat.id,
+    userId: chat.userId,
+    title: chat.title,
+    isActive: chat.isActive,
+    createdAt: chat.createdAt,
+    updatedAt: chat.updatedAt
+  };
 }
 
 // Update chat session
@@ -89,29 +99,39 @@ export async function saveChatMessage(
   sessionId: string,
   role: 'user' | 'assistant' | 'system',
   content: string,
-  tokens?: number
+  tokens?: number,
+  metadata?: any
 ): Promise<ChatMessage> {
-  const [message] = await db.insert(chatMessages).values({
+  const message = await chatTreeService.addMessage(
     sessionId,
     role,
     content,
-    tokens
-  }).returning();
+    undefined, // parentId - will be root level
+    { ...metadata, tokens }
+  );
 
-  // Update session's updatedAt timestamp
-  await updateChatSession(sessionId, {});
-
-  return message;
+  return {
+    id: message.id,
+    sessionId: message.chatId,
+    role: message.role,
+    content: message.content,
+    tokens: message.tokens,
+    createdAt: message.createdAt
+  };
 }
 
-// Get messages for a chat session
+// Get messages for a chat session (now uses tree service)
 export async function getChatMessages(sessionId: string, limit: number = 50): Promise<ChatMessage[]> {
-  return await db
-    .select()
-    .from(chatMessages)
-    .where(eq(chatMessages.sessionId, sessionId))
-    .orderBy(chatMessages.createdAt)
-    .limit(limit);
+  // For backward compatibility, we'll get the linear messages
+  const messages = await chatTreeService.getLinearMessages(sessionId, 'dummy-user-id');
+  return messages.slice(0, limit).map(msg => ({
+    id: msg.id,
+    sessionId: sessionId,
+    role: msg.role,
+    content: msg.content,
+    tokens: 0,
+    createdAt: new Date()
+  }));
 }
 
 // Convert database messages to AI SDK format

@@ -75,29 +75,54 @@ import {
 	})
   );
 
-  // Chat Sessions Table
-  export const chatSessions = pgTable('chat_sessions', {
+  // Chat Sessions Table (renamed from chatSessions for consistency)
+  export const chats = pgTable('chats', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	userId: text('user_id')
 	  .notNull()
 	  .references(() => users.id, { onDelete: 'cascade' }),
 	title: text('title').notNull().default('New Chat'),
+	description: text('description'), // Optional chat description
 	isActive: boolean('is_active').notNull().default(true),
 	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow()
   });
 
-  // Chat Messages Table
-  export const chatMessages = pgTable('chat_messages', {
+  // Chat Messages Table with Tree Structure Support
+  export const messages = pgTable('messages', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	sessionId: uuid('session_id')
+	chatId: uuid('chat_id')
 	  .notNull()
-	  .references(() => chatSessions.id, { onDelete: 'cascade' }),
+	  .references(() => chats.id, { onDelete: 'cascade' }),
+	parentId: uuid('parent_id')
+	  .references(() => messages.id, { onDelete: 'cascade' }), // For branching
 	role: messageRoleEnum('role').notNull(),
 	content: text('content').notNull(),
+	// Metadata for enhanced functionality
+	metadata: text('metadata'), // JSON string for additional data (citations, attachments, etc.)
 	tokens: integer('tokens').default(0),
-	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow()
+	// Tree structure fields
+	depth: integer('depth').notNull().default(0), // How deep in the tree (0 = root level)
+	path: text('path'), // Materialized path for efficient tree queries (e.g., "1.2.3")
+	isDeleted: boolean('is_deleted').notNull().default(false), // Soft delete
+	// Timestamps
+	createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+	updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow()
   });
+
+  // Legacy tables for backward compatibility (will be deprecated)
+  export const chatSessions = chats;
+  export const chatMessages = messages;
+
+  // Indexes for better performance
+  export const messagesIndexes = {
+    chatId: 'messages_chat_id_idx',
+    parentId: 'messages_parent_id_idx', 
+    path: 'messages_path_idx',
+    role: 'messages_role_idx',
+    createdAt: 'messages_created_at_idx',
+    isDeleted: 'messages_is_deleted_idx'
+  };
 
   // Chat Analytics Table (for tracking usage)
   export const chatAnalytics = pgTable('chat_analytics', {
