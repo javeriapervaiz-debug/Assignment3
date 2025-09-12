@@ -4,6 +4,12 @@
     id: string;
     role: 'user' | 'assistant';
     content: string;
+    attachment?: {
+      id: string;
+      title: string;
+      fileType: string;
+      fileSize: number;
+    };
     citations?: Array<{id: string, title: string, url?: string, chunk?: string}>;
   }
   import MarkdownRenderer from './MarkdownRenderer.svelte';
@@ -62,6 +68,28 @@
           {:else}
             <div class="text-gray-200 whitespace-pre-wrap">{message.content}</div>
           {/if}
+        {/if}
+        
+        <!-- Attachment Indicator for User Messages -->
+        {#if isUser && message.attachment}
+          <div class="mt-3 pt-3 border-t border-purple-500/20">
+            <div class="flex items-center space-x-2 text-purple-300">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate">{message.attachment.title}</p>
+                <p class="text-xs text-purple-400">
+                  {message.attachment.fileType.toUpperCase()} • {(message.attachment.fileSize / 1024).toFixed(1)} KB
+                </p>
+              </div>
+              <div class="flex-shrink-0">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300">
+                  Attached
+                </span>
+              </div>
+            </div>
+          </div>
         {/if}
       </div>
       
