@@ -4,26 +4,37 @@
 	let { form }: { form: ActionData } = $props();
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-	<div class="w-full max-w-md space-y-8">
+<div class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
+	<div class="w-full max-w-md space-y-10">
 		<!-- Header -->
 		<div class="text-center">
-			<div class="mx-auto h-12 w-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-				<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-				</svg>
+			<div class="relative overflow-hidden mb-8">
+				<!-- Animated Background -->
+				<div class="absolute inset-0 bg-gradient-to-r from-green-600/20 via-emerald-500/10 to-green-600/20 animate-pulse"></div>
+				<div class="absolute inset-0 bg-gradient-to-br from-black/50 via-transparent to-black/50"></div>
+				
+				<!-- Header Content -->
+				<div class="relative bg-gradient-to-br from-gray-900/90 via-black/80 to-gray-900/90 backdrop-blur-md rounded-3xl shadow-2xl border border-green-500/30 p-8">
+					<div class="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 via-emerald-500 to-green-400 rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-green-500/30 animate-pulse">
+						<svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+						</svg>
+					</div>
+					<h2 class="text-4xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-300 bg-clip-text text-transparent drop-shadow-2xl">
+						Create your account
+					</h2>
+					<p class="mt-4 text-lg text-gray-300">
+						Already have an account?
+						<a href="/login" class="font-semibold text-green-400 hover:text-green-300 transition-colors duration-300">
+							Sign in
+						</a>
+					</p>
+				</div>
 			</div>
-			<h2 class="text-3xl font-bold tracking-tight text-white">Create your account</h2>
-			<p class="mt-2 text-sm text-gray-300">
-				Already have an account?
-				<a href="/login" class="font-medium text-purple-400 hover:text-purple-300 transition-colors duration-200">
-					Sign in
-				</a>
-			</p>
 		</div>
 
 		<!-- Registration Form Card -->
-		<div class="bg-slate-800/50 backdrop-blur-sm py-8 px-6 shadow-2xl rounded-2xl border border-slate-700/50">
+		<div class="bg-gradient-to-br from-gray-900/90 via-black/80 to-gray-900/90 backdrop-blur-md py-10 px-8 shadow-2xl rounded-3xl border border-green-500/30 hover:border-green-400/50 transition-all duration-300">
 			<!-- Success Message -->
 			{#if form?.success}
 				<div class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm">
@@ -77,15 +88,15 @@
 				</div>
 			{/if}
 
-			<form method="POST" action="?/register" class="space-y-6">
+			<form method="POST" action="?/register" class="space-y-8">
 				<!-- Email Field -->
 				<div>
-					<label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+					<label for="email" class="block text-lg font-semibold text-gray-300 mb-4">
 						Email address
 					</label>
 					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+							<svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
 							</svg>
 						</div>
@@ -95,7 +106,7 @@
 							type="email"
 							autocomplete="email"
 							required
-							class="block w-full pl-10 pr-3 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 backdrop-blur-sm"
+							class="block w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-green-600/30 rounded-2xl text-white placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all duration-300 backdrop-blur-sm text-lg hover:border-green-500/50"
 							placeholder="Enter your email"
 						/>
 					</div>
@@ -103,12 +114,12 @@
 
 				<!-- Password Field -->
 				<div>
-					<label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+					<label for="password" class="block text-lg font-semibold text-gray-300 mb-4">
 						Password
 					</label>
 					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+							<svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
 							</svg>
 						</div>
@@ -118,7 +129,7 @@
 							type="password"
 							autocomplete="new-password"
 							required
-							class="block w-full pl-10 pr-3 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 backdrop-blur-sm"
+							class="block w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-green-600/30 rounded-2xl text-white placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all duration-300 backdrop-blur-sm text-lg hover:border-green-500/50"
 							placeholder="Enter your password"
 						/>
 					</div>
@@ -128,9 +139,9 @@
 				<div>
 					<button
 						type="submit"
-						class="group relative flex w-full justify-center items-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 text-sm font-semibold text-white hover:from-purple-700 hover:to-pink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-500 transition-all duration-200 shadow-lg hover:shadow-purple-500/25"
+						class="group relative flex w-full justify-center items-center rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-4 text-lg font-bold text-white hover:from-green-700 hover:to-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500 transition-all duration-300 shadow-2xl hover:shadow-green-500/30 transform hover:scale-105"
 					>
-						<svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<svg class="w-6 h-6 mr-3 group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
 						</svg>
 						Create Account
@@ -141,11 +152,11 @@
 
 		<!-- Additional Links -->
 		<div class="text-center">
-			<p class="text-xs text-gray-400">
+			<p class="text-lg text-gray-400">
 				By signing up, you agree to our
-				<a href="/terms" class="text-purple-400 hover:text-purple-300 transition-colors duration-200">Terms of Service</a>
+				<a href="/terms" class="font-semibold text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline">Terms of Service</a>
 				and
-				<a href="/privacy" class="text-purple-400 hover:text-purple-300 transition-colors duration-200">Privacy Policy</a>
+				<a href="/privacy" class="font-semibold text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline">Privacy Policy</a>
 			</p>
 		</div>
 	</div>

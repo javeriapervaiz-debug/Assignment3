@@ -133,10 +133,10 @@
   }
 </script>
 
-<div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4">
+<div class="bg-gray-900/90 backdrop-blur-sm border border-green-600/30 rounded-2xl p-4">
   <!-- File Upload Area -->
   {#if showUploadArea}
-    <div class="mb-4 p-4 bg-slate-700/30 border border-slate-600/50 rounded-xl">
+    <div class="mb-4 p-4 bg-gray-800/50 border border-green-600/30 rounded-xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-sm font-medium text-white">Upload Document</h3>
         <button
@@ -164,7 +164,7 @@
             type="button"
             on:click={triggerFileUpload}
             disabled={isUploading}
-            class="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50"
+            class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -179,15 +179,15 @@
         
         {#if isUploading}
           <div class="space-y-2">
-            <div class="flex items-center space-x-2 text-sm text-emerald-400">
+            <div class="flex items-center space-x-2 text-sm text-green-400">
               <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               <span>Processing document...</span>
             </div>
-            <div class="w-full bg-slate-600 rounded-full h-2">
+            <div class="w-full bg-gray-600 rounded-full h-2">
               <div 
-                class="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                class="bg-green-500 h-2 rounded-full transition-all duration-300"
                 style="width: {uploadProgress}%"
               ></div>
             </div>
@@ -199,18 +199,18 @@
 
   <!-- Uploaded Document Indicator -->
   {#if uploadedDocument}
-    <div class="mb-3 p-3 bg-emerald-600/20 border border-emerald-500/30 rounded-lg">
+    <div class="mb-3 p-3 bg-green-600/20 border border-green-500/30 rounded-lg">
       <div class="flex items-center space-x-2">
-        <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span class="text-sm text-emerald-300">
+        <span class="text-sm text-green-300">
           Document "{uploadedDocument.title}" uploaded successfully! You can now ask questions about it.
         </span>
         <button
           type="button"
           on:click={() => uploadedDocument = null}
-          class="ml-auto text-emerald-400 hover:text-emerald-300 transition-colors"
+          class="ml-auto text-green-400 hover:text-green-300 transition-colors"
           aria-label="Dismiss"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -232,9 +232,9 @@
         {disabled}
         {placeholder}
         class="
-          w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl
+          w-full px-4 py-3 bg-gray-800/50 border border-green-600/30 rounded-xl
           text-white placeholder-gray-400 resize-none
-          focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+          focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
           disabled:opacity-50 disabled:cursor-not-allowed
           backdrop-blur-sm transition-all duration-200
         "
@@ -256,9 +256,9 @@
         on:click={toggleUploadArea}
         disabled={disabled || isUploading}
         class="
-          flex-shrink-0 w-12 h-12 bg-slate-600 hover:bg-slate-500
+          flex-shrink-0 w-12 h-12 bg-gray-700 hover:bg-gray-600
           text-white rounded-xl flex items-center justify-center
-          focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-800
+          focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-all duration-200
         "
@@ -275,10 +275,10 @@
         type="submit"
         {disabled}
         class="
-          flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600
+          flex-shrink-0 w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-600
           text-white rounded-xl flex items-center justify-center
-          hover:from-purple-700 hover:to-pink-700
-          focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-800
+          hover:from-green-700 hover:to-emerald-700
+          focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-all duration-200 shadow-lg
         "
@@ -301,28 +301,28 @@
     <button
       type="button"
       on:click={() => dispatch('quick-action', { action: 'help' })}
-      class="px-3 py-1 text-xs bg-slate-700/50 text-gray-300 rounded-lg hover:bg-slate-600/50 transition-colors duration-200"
+      class="px-3 py-1 text-xs bg-gray-800/50 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
     >
       Need Help?
     </button>
     <button
       type="button"
       on:click={() => dispatch('quick-action', { action: 'features' })}
-      class="px-3 py-1 text-xs bg-slate-700/50 text-gray-300 rounded-lg hover:bg-slate-600/50 transition-colors duration-200"
+      class="px-3 py-1 text-xs bg-gray-800/50 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
     >
       Platform Features
     </button>
     <button
       type="button"
       on:click={() => dispatch('quick-action', { action: 'security' })}
-      class="px-3 py-1 text-xs bg-slate-700/50 text-gray-300 rounded-lg hover:bg-slate-600/50 transition-colors duration-200"
+      class="px-3 py-1 text-xs bg-gray-800/50 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
     >
       Security Tips
     </button>
     <button
       type="button"
       on:click={toggleUploadArea}
-      class="px-3 py-1 text-xs bg-purple-600/50 text-purple-300 rounded-lg hover:bg-purple-600/70 transition-colors duration-200"
+      class="px-3 py-1 text-xs bg-green-600/50 text-green-300 rounded-lg hover:bg-green-600/70 transition-colors duration-200"
     >
       📄 Upload Document
     </button>

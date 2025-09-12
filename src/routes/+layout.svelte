@@ -19,12 +19,12 @@
 </svelte:head>
 
 <!-- Header Navbar -->
-<header class="bg-slate-900/95 backdrop-blur-sm shadow-lg border-b border-slate-700/50">
+<header class="bg-gradient-to-r from-black via-gray-900 to-black backdrop-blur-md shadow-2xl border-b border-green-500/40">
 	<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
 			<!-- App Title -->
 			<div class="flex items-center">
-				<a href="/" class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent hover:from-purple-300 hover:to-pink-300 transition-all duration-200">
+				<a href="/" class="text-2xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-300 bg-clip-text text-transparent hover:from-green-300 hover:via-emerald-300 hover:to-green-200 transition-all duration-300 drop-shadow-lg">
 					🔐 Auth App
 				</a>
 			</div>
@@ -35,19 +35,19 @@
 				<div class="hidden md:flex items-center space-x-4">
 					<a 
 						href="/about" 
-						class="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+						class="text-gray-400 hover:text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-green-500/10 hover:shadow-lg hover:shadow-green-500/20"
 					>
 						About
 					</a>
 					<a 
 						href="/faq" 
-						class="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+						class="text-gray-400 hover:text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-green-500/10 hover:shadow-lg hover:shadow-green-500/20"
 					>
 						FAQ
 					</a>
 					<a 
 						href="/contact" 
-						class="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+						class="text-gray-400 hover:text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-green-500/10 hover:shadow-lg hover:shadow-green-500/20"
 					>
 						Contact
 					</a>
@@ -62,14 +62,14 @@
 						
 						<a 
 							href="/dashboard" 
-							class="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+							class="text-gray-400 hover:text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-green-500/10 hover:shadow-lg hover:shadow-green-500/20"
 						>
 							Dashboard
 						</a>
 						
 						<a 
 							href="/dashboard/profile" 
-							class="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+							class="text-gray-400 hover:text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-green-500/10 hover:shadow-lg hover:shadow-green-500/20"
 						>
 							Profile
 						</a>
@@ -77,7 +77,7 @@
 						<!-- AI Chat Link -->
 						<a 
 							href="/chat" 
-							class="text-emerald-300 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 border border-emerald-500/30 bg-emerald-500/10"
+							class="text-green-400 hover:text-green-300 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border border-green-500/50 bg-gradient-to-r from-green-500/10 to-emerald-500/10 hover:from-green-500/20 hover:to-emerald-500/20 shadow-lg shadow-green-500/20"
 						>
 							🤖 AI Chat
 						</a>
@@ -85,7 +85,7 @@
 						<!-- Chat Dashboard Link -->
 						<a 
 							href="/chat/dashboard" 
-							class="text-blue-300 hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 border border-blue-500/30 bg-blue-500/10"
+							class="text-gray-400 hover:text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border border-gray-600/40 bg-gray-800/40 hover:bg-gray-700/50 hover:shadow-lg hover:shadow-gray-500/20"
 						>
 							📊 Chat Stats
 						</a>
@@ -102,7 +102,7 @@
 						
 						<button 
 							onclick={handleLogout}
-							class="bg-slate-700 hover:bg-slate-600 text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+							class="bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border border-gray-600/40 hover:border-gray-500/60 shadow-lg hover:shadow-xl hover:shadow-gray-500/20"
 						>
 							Sign Out
 						</button>
@@ -112,13 +112,13 @@
 					<div class="flex items-center space-x-4">
 						<a 
 							href="/register" 
-							class="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+							class="text-gray-400 hover:text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-green-500/10 hover:shadow-lg hover:shadow-green-500/20"
 						>
 							Register
 						</a>
 						<a 
 							href="/login" 
-							class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-purple-500/25"
+							class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105"
 						>
 							Login
 						</a>
@@ -129,23 +129,23 @@
 	</nav>
 	
 	<!-- Mobile Navigation Menu (hidden by default) -->
-	<div class="md:hidden bg-slate-800/50 border-b border-slate-700/50 px-4 py-2">
+	<div class="md:hidden bg-gray-900/50 border-b border-green-600/30 px-4 py-2">
 		<div class="flex flex-wrap justify-center gap-4">
 			<a 
 				href="/about" 
-				class="text-gray-300 hover:text-purple-400 text-sm font-medium transition-colors duration-200"
+				class="text-gray-400 hover:text-green-400 text-sm font-medium transition-colors duration-200"
 			>
 				About
 			</a>
 			<a 
 				href="/faq" 
-				class="text-gray-300 hover:text-purple-400 text-sm font-medium transition-colors duration-200"
+				class="text-gray-400 hover:text-green-400 text-sm font-medium transition-colors duration-200"
 			>
 				FAQ
 			</a>
 			<a 
 				href="/contact" 
-				class="text-gray-300 hover:text-purple-400 text-sm font-medium transition-colors duration-200"
+				class="text-gray-400 hover:text-green-400 text-sm font-medium transition-colors duration-200"
 			>
 				Contact
 			</a>
@@ -154,8 +154,6 @@
 </header>
 
 <!-- Main Content Area -->
-<main class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-	
-		{@render children()}
-	 
+<main class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
+	{@render children()}
 </main>

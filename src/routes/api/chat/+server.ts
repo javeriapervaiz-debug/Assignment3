@@ -106,7 +106,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     // Load previous messages from database if this is a new session
     let allMessages = messages;
     if (messages.length === 1) {
-      const dbMessages = await getChatMessages(chatSession.id);
+      const dbMessages = await getChatMessages(chatSession.id, session.user.id);
       const previousMessages = convertToAIMessages(dbMessages);
       allMessages = [...previousMessages, ...messages];
     }

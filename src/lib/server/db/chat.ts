@@ -75,23 +75,14 @@ export async function getChatSession(sessionId: string, userId: string): Promise
   };
 }
 
-// Update chat session
-export async function updateChatSession(sessionId: string, updates: Partial<ChatSession>): Promise<void> {
-  await db
-    .update(chatSessions)
-    .set({
-      ...updates,
-      updatedAt: new Date()
-    })
-    .where(eq(chatSessions.id, sessionId));
+// Update chat session (now uses tree service)
+export async function updateChatSession(sessionId: string, userId: string, updates: { title?: string; description?: string }): Promise<void> {
+  await chatTreeService.updateChat(sessionId, userId, updates);
 }
 
-// Delete chat session (soft delete)
+// Delete chat session (now uses tree service)
 export async function deleteChatSession(sessionId: string, userId: string): Promise<void> {
-  await db
-    .update(chatSessions)
-    .set({ isActive: false })
-    .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.userId, userId)));
+  await chatTreeService.deleteChat(sessionId, userId);
 }
 
 // Save a message to the database
@@ -121,9 +112,9 @@ export async function saveChatMessage(
 }
 
 // Get messages for a chat session (now uses tree service)
-export async function getChatMessages(sessionId: string, limit: number = 50): Promise<ChatMessage[]> {
+export async function getChatMessages(sessionId: string, userId: string, limit: number = 50): Promise<ChatMessage[]> {
   // For backward compatibility, we'll get the linear messages
-  const messages = await chatTreeService.getLinearMessages(sessionId, 'dummy-user-id');
+  const messages = await chatTreeService.getLinearMessages(sessionId, userId);
   return messages.slice(0, limit).map(msg => ({
     id: msg.id,
     sessionId: sessionId,
@@ -227,3 +218,5 @@ export async function cleanupOldSessions(daysOld: number = 30): Promise<void> {
       // Add date comparison when needed
     ));
 }
+
+

@@ -33,38 +33,49 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-	<div class="w-full max-w-md space-y-8">
+<div class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
+	<div class="w-full max-w-md space-y-10">
 		<!-- Header -->
 		<div class="text-center">
-			<div class="mx-auto h-12 w-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-				<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-				</svg>
+			<div class="relative overflow-hidden mb-8">
+				<!-- Animated Background -->
+				<div class="absolute inset-0 bg-gradient-to-r from-green-600/20 via-emerald-500/10 to-green-600/20 animate-pulse"></div>
+				<div class="absolute inset-0 bg-gradient-to-br from-black/50 via-transparent to-black/50"></div>
+				
+				<!-- Header Content -->
+				<div class="relative bg-gradient-to-br from-gray-900/90 via-black/80 to-gray-900/90 backdrop-blur-md rounded-3xl shadow-2xl border border-green-500/30 p-8">
+					<div class="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 via-emerald-500 to-green-400 rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-green-500/30 animate-pulse">
+						<svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+						</svg>
+					</div>
+					<h2 class="text-4xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-300 bg-clip-text text-transparent drop-shadow-2xl">
+						Sign in to your account
+					</h2>
+					<p class="mt-4 text-lg text-gray-300">
+						Don't have an account?
+						<a
+							href="/register"
+							class="font-semibold text-green-400 hover:text-green-300 transition-colors duration-300"
+						>
+							Sign up
+						</a>
+					</p>
+				</div>
 			</div>
-			<h2 class="text-3xl font-bold tracking-tight text-white">Sign in to your account</h2>
-			<p class="mt-2 text-sm text-gray-300">
-				Don't have an account?
-				<a
-					href="/register"
-					class="font-medium text-purple-400 hover:text-purple-300 transition-colors duration-200"
-				>
-					Sign up
-				</a>
-			</p>
 		</div>
 
 		<!-- Login Form Card -->
-		<div class="bg-slate-800/50 backdrop-blur-sm py-8 px-6 shadow-2xl rounded-2xl border border-slate-700/50">
+		<div class="bg-gradient-to-br from-gray-900/90 via-black/80 to-gray-900/90 backdrop-blur-md py-10 px-8 shadow-2xl rounded-3xl border border-green-500/30 hover:border-green-400/50 transition-all duration-300">
 			<!-- OAuth Buttons Section -->
-			<div class="space-y-4 mb-6">
+			<div class="space-y-6 mb-8">
 				<!-- Google Sign In -->
 				<form method="POST" action="/auth/signin/google">
 					<button
 						type="submit"
-						class="w-full flex justify-center items-center px-4 py-3 border border-slate-600 rounded-xl text-sm font-medium text-white bg-slate-700/50 hover:bg-slate-600/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 backdrop-blur-sm"
+						class="group w-full flex justify-center items-center px-6 py-4 border border-gray-600/30 rounded-2xl text-lg font-semibold text-white bg-gray-800/50 hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 backdrop-blur-sm hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/20 transform hover:scale-105"
 					>
-						<svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
+						<svg class="w-6 h-6 mr-4 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24">
 							<path
 								fill="#4285F4"
 								d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -90,9 +101,9 @@
 				<form method="POST" action="/auth/signin/github">
 					<button
 						type="submit"
-						class="w-full flex justify-center items-center px-4 py-3 border border-slate-600 rounded-xl text-sm font-medium text-white bg-slate-700/50 hover:bg-slate-600/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 backdrop-blur-sm"
+						class="group w-full flex justify-center items-center px-6 py-4 border border-gray-600/30 rounded-2xl text-lg font-semibold text-white bg-gray-800/50 hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 backdrop-blur-sm hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/20 transform hover:scale-105"
 					>
-						<svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
+						<svg class="w-6 h-6 mr-4 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
 							<path
 								d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"
 							/>
@@ -103,12 +114,12 @@
 			</div>
 
 			<!-- Divider -->
-			<div class="relative mb-6">
+			<div class="relative mb-8">
 				<div class="absolute inset-0 flex items-center">
-					<div class="w-full border-t border-slate-600"></div>
+					<div class="w-full border-t border-green-600/30"></div>
 				</div>
-				<div class="relative flex justify-center text-sm">
-					<span class="px-4 bg-slate-800/50 text-gray-400 backdrop-blur-sm">OR</span>
+				<div class="relative flex justify-center text-lg">
+					<span class="px-6 bg-gradient-to-br from-gray-900/90 via-black/80 to-gray-900/90 text-gray-400 backdrop-blur-sm font-semibold">OR</span>
 				</div>
 			</div>
 			<!-- Password Reset Success Message -->
@@ -171,15 +182,15 @@
         **FIX #1: Added method="POST" and the correct action attribute.
         This tells the form to send the data to the Auth.js credentials handler.
       -->
-			<form class="space-y-6" method="POST" action="/auth/callback/credentials">
+			<form class="space-y-8" method="POST" action="/auth/callback/credentials">
 				<!-- Email Field -->
 				<div>
-					<label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+					<label for="email" class="block text-lg font-semibold text-gray-300 mb-4">
 						Email address
 					</label>
 					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+							<svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
 							</svg>
 						</div>
@@ -189,7 +200,7 @@
 							type="email"
 							autocomplete="email"
 							required
-							class="block w-full pl-10 pr-3 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 backdrop-blur-sm"
+							class="block w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-green-600/30 rounded-2xl text-white placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all duration-300 backdrop-blur-sm text-lg hover:border-green-500/50"
 							placeholder="Enter your email"
 						/>
 					</div>
@@ -197,12 +208,12 @@
 
 				<!-- Password Field -->
 				<div>
-					<label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+					<label for="password" class="block text-lg font-semibold text-gray-300 mb-4">
 						Password
 					</label>
 					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+							<svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
 							</svg>
 						</div>
@@ -212,7 +223,7 @@
 							type="password"
 							autocomplete="current-password"
 							required
-							class="block w-full pl-10 pr-3 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 backdrop-blur-sm"
+							class="block w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-green-600/30 rounded-2xl text-white placeholder-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all duration-300 backdrop-blur-sm text-lg hover:border-green-500/50"
 							placeholder="Enter your password"
 						/>
 					</div>
@@ -222,9 +233,9 @@
 				<div>
 					<button
 						type="submit"
-						class="group relative flex w-full justify-center items-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 text-sm font-semibold text-white hover:from-purple-700 hover:to-pink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-500 transition-all duration-200 shadow-lg hover:shadow-purple-500/25"
+						class="group relative flex w-full justify-center items-center rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-4 text-lg font-bold text-white hover:from-green-700 hover:to-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500 transition-all duration-300 shadow-2xl hover:shadow-green-500/30 transform hover:scale-105"
 					>
-						<svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<svg class="w-6 h-6 mr-3 group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
 						</svg>
 						Sign In
@@ -235,8 +246,8 @@
 
 		<!-- Additional Links -->
 		<div class="text-center">
-			<p class="text-xs text-gray-400">
-				<a href="/forgot-password" class="text-purple-400 hover:text-purple-300 transition-colors duration-200"
+			<p class="text-lg text-gray-400">
+				<a href="/forgot-password" class="font-semibold text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline"
 					>Forgot your password?</a
 				>
 			</p>

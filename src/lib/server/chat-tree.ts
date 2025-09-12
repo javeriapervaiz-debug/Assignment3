@@ -77,7 +77,10 @@ export class ChatTreeService {
         eq(messages.chatId, chats.id),
         eq(messages.isDeleted, false)
       ))
-      .where(eq(chats.userId, userId))
+      .where(and(
+        eq(chats.userId, userId),
+        eq(chats.isActive, true)  // Only return active chats
+      ))
       .groupBy(chats.id)
       .orderBy(desc(chats.updatedAt));
 
@@ -175,7 +178,7 @@ export class ChatTreeService {
 
     const [message] = await db.insert(messages).values({
       chatId,
-      parentId,
+      parentId: parentId || null,
       role,
       content,
       metadata: metadata ? JSON.stringify(metadata) : null,

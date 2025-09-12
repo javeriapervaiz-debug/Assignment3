@@ -321,10 +321,10 @@
   });
 </script>
 
-<div class="flex h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+<div class="flex h-full bg-gradient-to-br from-black via-gray-900 to-black">
   <!-- Session Manager Sidebar -->
   {#if showSessionManager}
-    <div class="w-80 flex-shrink-0 border-r border-slate-700/50 p-4">
+    <div class="w-80 flex-shrink-0 border-r border-green-500/40 p-4 shadow-2xl shadow-green-500/10">
       <ChatSessionManager 
         {sessions}
         {currentSessionId}
@@ -340,10 +340,10 @@
   <!-- Main Chat Area -->
   <div class="flex-1 flex flex-col">
     <!-- Chat Header -->
-    <div class="flex-shrink-0 bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4">
+    <div class="flex-shrink-0 bg-gradient-to-r from-gray-900/95 via-black/90 to-gray-900/95 backdrop-blur-md border-b border-green-500/50 p-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+          <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -356,13 +356,13 @@
         
         <div class="flex items-center space-x-2">
           {#if isLoading}
-            <div class="flex items-center space-x-2 text-emerald-400">
-              <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <div class="flex items-center space-x-2 text-green-400">
+              <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               <span class="text-sm">Online</span>
             </div>
           {:else}
-            <div class="flex items-center space-x-2 text-gray-400">
-              <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+            <div class="flex items-center space-x-2 text-green-400">
+              <div class="w-2 h-2 bg-green-400 rounded-full"></div>
               <span class="text-sm">Ready</span>
             </div>
           {/if}
@@ -380,7 +380,7 @@
         <!-- Welcome Message -->
         <div class="text-center py-12">
           <div class="max-w-md mx-auto">
-            <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -389,8 +389,8 @@
             <p class="text-gray-400 text-sm mb-4">
               I'm here to help you with questions about the platform, security, features, and technical support.
             </p>
-            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-              <p class="text-blue-300 text-xs">
+            <div class="bg-gray-800/50 border border-green-600/30 rounded-lg p-3">
+              <p class="text-gray-300 text-xs">
                 <strong>💡 Tip:</strong> If you see an error, make sure your GEMINI_API_KEY is configured in the .env file.
               </p>
             </div>

@@ -30,7 +30,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
     }
 
     // Get messages for this session
-    const dbMessages = await getChatMessages(id);
+    const dbMessages = await getChatMessages(id, session.user.id);
     const messages = convertToAIMessages(dbMessages);
 
     return json({ 
@@ -68,7 +68,7 @@ export const PUT: RequestHandler = async ({ params, locals, request }) => {
     }
 
     // Update session
-    await updateChatSession(id, { title });
+    await updateChatSession(id, session.user.id, { title });
     
     return json({ success: true });
   } catch (error) {
