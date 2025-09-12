@@ -264,15 +264,28 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     console.log('Calling Gemini API...');
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+    // Check if streaming is requested
+    const url = new URL(request.url);
+    const stream = url.searchParams.get('stream') === 'true';
+    
     // Generate response
     console.log('Generating content with', geminiMessages.length, 'messages');
     console.log('Gemini messages structure:', JSON.stringify(geminiMessages, null, 2));
+    console.log('Streaming mode:', stream);
     
     let result;
     try {
-      result = await model.generateContent({
-        contents: geminiMessages
-      });
+      if (stream) {
+        // Use streaming for real-time responses
+        result = await model.generateContentStream({
+          contents: geminiMessages
+        });
+      } else {
+        // Use regular generation for non-streaming
+        result = await model.generateContent({
+          contents: geminiMessages
+        });
+      }
     } catch (geminiError: any) {
       // Handle Gemini API overload or other errors
       if (geminiError.status === 503) {
@@ -314,7 +327,8 @@ ${ragContext ? `Based on your uploaded documents, here's what I found:\n\n${ragC
       let fallbackResponse = `I'm currently experiencing connectivity issues with the AI service. However, I can still help you with basic information.\n\n`;
       
       // Check if user is asking for code
-      if (userMessage.toLowerCase().includes('code') || userMessage.toLowerCase().includes('c++') || userMessage.toLowerCase().includes('hello world')) {
+      const lastUserMessage = allMessages[allMessages.length - 1]?.content || '';
+      if (lastUserMessage.toLowerCase().includes('code') || lastUserMessage.toLowerCase().includes('c++') || lastUserMessage.toLowerCase().includes('hello world')) {
         fallbackResponse += `Here's a simple **Hello World** program in C++:\n\n\`\`\`cpp\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}\n\`\`\`\n\n**Explanation:**\n- \`#include <iostream>\` includes the input/output stream library\n- \`int main()\` is the entry point of the program\n- \`std::cout\` prints text to the console\n- \`std::endl\` adds a newline and flushes the output\n- \`return 0\` indicates successful program execution\n\n*Note: For more detailed explanations and advanced code examples, please try again when the AI service is available.*`;
       } else if (ragContext) {
         fallbackResponse += `Based on your uploaded documents, here's what I found:\n\n${ragContext}\n\n*Note: This response was generated using your uploaded document content. For more detailed analysis, please try again when the AI service is available.*`;
@@ -343,29 +357,94 @@ ${ragContext ? `Based on your uploaded documents, here's what I found:\n\n${ragC
     }
 
     console.log('Got response from Gemini');
-    const response = await result.response;
-    const aiResponseText = response.text();
-    console.log('AI response length:', aiResponseText.length);
+    
+    if (stream) {
+      // Handle streaming response
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            let fullResponse = '';
+            
+            for await (const chunk of (result as any).stream) {
+              const chunkText = chunk.text();
+              fullResponse += chunkText;
+              
+              // Send chunk to client
+              const data = JSON.stringify({
+                type: 'chunk',
+                content: chunkText,
+                sessionId: chatSession.id
+              });
+              
+              controller.enqueue(new TextEncoder().encode(`data: ${data}\n\n`));
+            }
+            
+            // Send final response with citations
+            const finalData = JSON.stringify({
+              type: 'done',
+              content: fullResponse,
+              sessionId: chatSession.id,
+              citations: citations
+            });
+            
+            controller.enqueue(new TextEncoder().encode(`data: ${finalData}\n\n`));
+            
+            // Save complete response to database
+            await saveChatMessage(
+              chatSession.id,
+              'assistant',
+              fullResponse
+            );
+            
+            controller.close();
+          } catch (error) {
+            console.error('Streaming error:', error);
+            const errorData = JSON.stringify({
+              type: 'error',
+              error: 'Streaming failed',
+              sessionId: chatSession.id
+            });
+            controller.enqueue(new TextEncoder().encode(`data: ${errorData}\n\n`));
+            controller.close();
+          }
+        }
+      });
+      
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Cache-Control'
+        }
+      });
+    } else {
+      // Handle non-streaming response
+      const response = await result.response;
+      const aiResponseText = response.text();
+      console.log('AI response length:', aiResponseText.length);
 
-    // Save AI response to database
-    await saveChatMessage(
-      chatSession.id,
-      'assistant',
-      aiResponseText
-    );
+      // Save AI response to database
+      await saveChatMessage(
+        chatSession.id,
+        'assistant',
+        aiResponseText
+      );
 
-    // Return JSON response with citations
-    return new Response(
-      JSON.stringify({ 
-        response: aiResponseText,
-        sessionId: chatSession.id,
-        citations: citations
-      }),
-      { 
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+      // Return JSON response with citations
+      return new Response(
+        JSON.stringify({ 
+          response: aiResponseText,
+          sessionId: chatSession.id,
+          citations: citations
+        }),
+        { 
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
   } catch (error) {
     console.error('Chat API error:', error);

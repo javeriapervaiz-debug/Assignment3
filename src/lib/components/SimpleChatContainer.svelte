@@ -78,14 +78,27 @@
     isLoading = true;
     error = null;
     
+    // Create placeholder for streaming assistant message
+    const assistantMessageId = (Date.now() + 1).toString();
+    const assistantMessage = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      citations: [],
+      isStreaming: true
+    };
+    
+    messages = [...messages, assistantMessage];
+    
     try {
-      const response = await fetch('/api/chat', {
+      // Use streaming by default
+      const response = await fetch('/api/chat?stream=true', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          messages: messages,
+          messages: messages.slice(0, -1), // Exclude the placeholder assistant message
           sessionId: currentSessionId
         })
       });
@@ -95,31 +108,108 @@
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
       
-      // Get the JSON response
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      // Add assistant message with the response and citations
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response || 'Sorry, I couldn\'t generate a response.',
-        citations: data.citations || []
-      };
-      
-      messages = [...messages, assistantMessage];
-      
-      // Update current session ID if provided
-      if (data.sessionId) {
-        currentSessionId = data.sessionId;
+      // Handle streaming response
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = '';
+        let citations = [];
+        
+        if (reader) {
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+              
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.slice(6));
+                    
+                    if (data.type === 'chunk') {
+                      fullContent += data.content;
+                      // Update the streaming message
+                      messages = messages.map(msg => 
+                        msg.id === assistantMessageId 
+                          ? { ...msg, content: fullContent }
+                          : msg
+                      );
+                    } else if (data.type === 'done') {
+                      fullContent = data.content;
+                      citations = data.citations || [];
+                      // Update current session ID if provided
+                      if (data.sessionId) {
+                        currentSessionId = data.sessionId;
+                      }
+                    } else if (data.type === 'error') {
+                      throw new Error(data.error || 'Streaming error');
+                    }
+                  } catch (parseError) {
+                    console.warn('Failed to parse SSE data:', parseError);
+                  }
+                }
+              }
+            }
+          } finally {
+            reader.releaseLock();
+          }
+        }
+        
+        // Finalize the assistant message
+        messages = messages.map(msg => 
+          msg.id === assistantMessageId 
+            ? { 
+                ...msg, 
+                content: fullContent, 
+                citations: citations,
+                isStreaming: false
+              }
+            : msg
+        );
+        
+      } else {
+        // Fallback to non-streaming response
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        // Update the assistant message with the response
+        messages = messages.map(msg => 
+          msg.id === assistantMessageId 
+            ? { 
+                ...msg, 
+                content: data.response || 'Sorry, I couldn\'t generate a response.',
+                citations: data.citations || [],
+                isStreaming: false
+              }
+            : msg
+        );
+        
+        // Update current session ID if provided
+        if (data.sessionId) {
+          currentSessionId = data.sessionId;
+        }
       }
       
     } catch (err) {
       console.error('Chat error:', err);
       error = err instanceof Error ? err.message : 'An error occurred';
+      
+      // Update the assistant message with error
+      messages = messages.map(msg => 
+        msg.id === assistantMessageId 
+          ? { 
+              ...msg, 
+              content: `Sorry, I encountered an error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+              isStreaming: false
+            }
+          : msg
+      );
     } finally {
       isLoading = false;
     }

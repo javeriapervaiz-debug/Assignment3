@@ -11,6 +11,7 @@
       fileSize: number;
     };
     citations?: Array<{id: string, title: string, url?: string, chunk?: string}>;
+    isStreaming?: boolean;
   }
   import MarkdownRenderer from './MarkdownRenderer.svelte';
   
@@ -53,7 +54,7 @@
         }
         {isLoading ? 'animate-pulse' : ''}
       ">
-        {#if isLoading && isAssistant}
+        {#if isLoading && isAssistant && !message.isStreaming}
           <div class="flex items-center space-x-2">
             <div class="flex space-x-1">
               <div class="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></div>
@@ -61,6 +62,18 @@
               <div class="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
             </div>
             <span class="text-sm text-gray-400">AI is thinking...</span>
+          </div>
+        {:else if isAssistant && message.isStreaming}
+          <div class="space-y-2">
+            <MarkdownRenderer content={message.content} citations={messageCitations} />
+            <div class="flex items-center space-x-2 text-emerald-400">
+              <div class="flex space-x-1">
+                <div class="w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
+                <div class="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                <div class="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+              </div>
+              <span class="text-xs">AI is typing...</span>
+            </div>
           </div>
         {:else}
           {#if isAssistant}
